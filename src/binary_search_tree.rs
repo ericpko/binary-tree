@@ -29,6 +29,7 @@ where
         self.root.is_none()
     }
 
+    // 20 -> 12 -> 33 -> 14 -> 16 -> 22 -> 35 -> 10 -> 12
     pub fn insert(&mut self, item: T) {
         // check root
         let Some(ref root) = self.root else {
@@ -39,6 +40,8 @@ where
         if &item < root {
             if let Some(mut left) = self.left.take() {
                 left.insert(item);
+                self.left = Some(left); // re-attach self.left
+
             // leaf
             } else {
                 self.left = Some(Box::new(BinaryTree::new(Some(item))));
@@ -46,6 +49,7 @@ where
         } else {
             if let Some(mut right) = self.right.take() {
                 right.insert(item);
+                self.right = Some(right);
             // leaf
             } else {
                 self.right = Some(Box::new(BinaryTree::new(Some(item))));
@@ -108,33 +112,43 @@ mod test {
         bst.insert(12);
 
         assert_eq!(bst.root.unwrap(), 20);
-        assert_eq!(bst.left.unwrap().root.unwrap(), 12);
-        assert_eq!(bst.left.unwrap().left.unwrap().root.unwrap(), 10);
+        assert_eq!(bst.left.as_ref().unwrap().root.unwrap(), 12);
+        assert_eq!(
+            bst.left
+                .as_ref()
+                .unwrap()
+                .left
+                .as_ref()
+                .unwrap()
+                .root
+                .unwrap(),
+            10
+        );
         assert_eq!(bst.root.unwrap(), 20);
     }
 
-    // #[test]
-    // fn test_contains() {
-    //     let mut bst = BinaryTree::new(Some(20));
-    //     bst.insert(12);
-    //     bst.insert(33);
-    //     bst.insert(14);
-    //     bst.insert(16);
-    //     bst.insert(22);
-    //     bst.insert(35);
-    //     bst.insert(10);
-    //     bst.insert(12);
+    #[test]
+    fn test_contains() {
+        let mut bst = BinaryTree::new(Some(20));
+        bst.insert(12);
+        bst.insert(33);
+        bst.insert(14);
+        bst.insert(16);
+        bst.insert(22);
+        bst.insert(35);
+        bst.insert(10);
+        bst.insert(12);
 
-    //     assert_eq!(bst.contains(&10), true);
-    //     assert_eq!(bst.contains(&1), false);
-    //     assert_eq!(bst.contains(&8), false);
-    //     assert_eq!(bst.contains(&0), false);
-    //     assert_eq!(bst.contains(&20), true);
-    //     assert_eq!(bst.contains(&33), true);
-    //     assert_eq!(bst.contains(&12), true);
-    //     assert_eq!(bst.contains(&12), true);
-    //     assert_eq!(bst.contains(&22), true);
-    //     assert_eq!(bst.contains(&16), true);
-    //     assert_eq!(bst.contains(&35), true);
-    // }
+        assert_eq!(bst.contains(&10), true);
+        assert_eq!(bst.contains(&1), false);
+        assert_eq!(bst.contains(&8), false);
+        assert_eq!(bst.contains(&0), false);
+        assert_eq!(bst.contains(&20), true);
+        assert_eq!(bst.contains(&33), true);
+        assert_eq!(bst.contains(&12), true);
+        assert_eq!(bst.contains(&12), true);
+        assert_eq!(bst.contains(&22), true);
+        assert_eq!(bst.contains(&16), true);
+        assert_eq!(bst.contains(&35), true);
+    }
 }
